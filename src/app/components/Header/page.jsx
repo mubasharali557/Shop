@@ -201,7 +201,7 @@ export default function Header() {
       </section>
 
       {/* Nav 2 */}
-      <nav className="hidden md:flex items-center justify-center flex-wrap gap-4 text-sm font-medium mt-4 px-4 max-w-7xl mx-auto">
+      <nav className="hidden md:flex items-center justify-center flex-wrap gap-10 text-sm font-bold mt-4 px-4 max-w-7xl mx-auto">
         <Link href="/beverages" className="hover:text-pink-500">Beverages</Link>
         <Link href="/Milk" className="hover:text-pink-500">Milk</Link>
         <Link href="/HandAndBodyWashes" className="hover:text-pink-500">Hand And Body Washes</Link>
