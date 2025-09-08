@@ -66,8 +66,10 @@ export default function Header() {
 
           {/* Right Section */}
           <div className="flex items-center gap-4 sm:gap-6 font-medium text-sm sm:text-base">
+            <Link href="/about" className="hover:text-pink-500">About My Shop </Link>
             <Link href="/deliverto" className="hover:text-pink-500 hidden sm:block">Deliver to</Link>
             <Link href="/account" className="hover:text-pink-500">Login</Link>
+
 
             {/* Cart Button */}
             <button

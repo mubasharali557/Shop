@@ -19,7 +19,7 @@ const allProducts = [
     title: "OK Banaspati Ghee 1 KG",
     image: "/oil8.jpg",
     category: "Cooking Oil",
-    price: 2222,
+    price: 1400,
     rating: 5,
     reviews: 500,
   },
