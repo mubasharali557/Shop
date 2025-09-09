@@ -5,24 +5,24 @@ import { useCart } from "@/app/context/CartContext";
 
 const allProducts = [
   // Cooking Oil
-  {
-    id: 8,
-    title: "Shahtaj Canola Oil",
-    image: "/oil7.jpg",
-    category: "Cooking Oil",
-    price: 1400,
-    rating: 5,
-    reviews: 500,
-  },
-  {
-    id: 9,
-    title: "OK Banaspati Ghee 1 KG",
-    image: "/oil8.jpg",
-    category: "Cooking Oil",
-    price: 1400,
-    rating: 5,
-    reviews: 500,
-  },
+  // {
+  //   id: 8,
+  //   title: "Shahtaj Canola Oil",
+  //   image: "/oil7.jpg",
+  //   category: "Cooking Oil",
+  //   price: 1400,
+  //   rating: 5,
+  //   reviews: 500,
+  // },
+  // {
+  //   id: 9,
+  //   title: "OK Banaspati Ghee 1 KG",
+  //   image: "/oil8.jpg",
+  //   category: "Cooking Oil",
+  //   price: 1400,
+  //   rating: 5,
+  //   reviews: 500,
+  // },
   {
     id: 10,
     title: "Adam Desi Ghee 2.5 KG",
