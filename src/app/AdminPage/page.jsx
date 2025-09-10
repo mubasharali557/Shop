@@ -16,8 +16,8 @@ export default function AdminPageLayout({ children }) {
   const [error, setError] = useState("");
 
   const menuItems = [
-    { name: "Dashboard", icon: <FiHome />, href: "/AdminPage/dashboard" },
-    { name: "Users", icon: <FiUsers />, href: "/AdminPage/users" },
+    { name: "Orders", icon: <FiHome />, href: "/AdminPage/dashboard" },
+    { name: "Add New Products", icon: <FiUsers />, href: "/AdminPage/users" },
     { name: "Settings", icon: <FiSettings />, href: "/AdminPage/settings" },
   ];
 
