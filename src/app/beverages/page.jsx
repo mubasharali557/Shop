@@ -141,9 +141,60 @@ const products = [
   },
 ];
 
+// Star Rating Component
+const StarRating = ({ rating, setRating, reviews }) => {
+  const handleClick = (index) => {
+    // Toggle: if clicking the same star that's already selected, reset to 0
+    setRating(rating === index + 1 ? 0 : index + 1);
+  };
+
+  return (
+    <div className="flex items-center mt-1">
+      <div className="flex">
+        {[...Array(5)].map((_, index) => (
+          <button
+            key={index}
+            onClick={() => handleClick(index)}
+            className="focus:outline-none"
+            aria-label={`Rate ${index + 1} out of 5 stars`}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`h-5 w-5 ${
+                index < rating ? "text-yellow-400" : "text-gray-300"
+              }`}
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          </button>
+        ))}
+      </div>
+      <p className="text-gray-500 text-sm ml-2">({reviews} reviews)</p>
+    </div>
+  );
+};
+
 const Beverages = () => {
   const [showCart, setShowCart] = useState(false);
   const { cart, addToCart, removeFromCart, increaseQty, decreaseQty, totalItems } = useCart();
+  
+  // State to manage ratings for each product
+  const [productRatings, setProductRatings] = useState(
+    products.reduce((acc, product) => {
+      acc[product.id] = product.rating;
+      return acc;
+    }, {})
+  );
+
+  // Function to update rating for a specific product
+  const updateRating = (productId, newRating) => {
+    setProductRatings(prev => ({
+      ...prev,
+      [productId]: newRating
+    }));
+  };
 
   const totalPrice = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
 
@@ -283,14 +334,12 @@ const Beverages = () => {
 
             <h2 className="text-lg font-semibold mt-3">{product.title}</h2>
 
-            <div className="flex items-center mt-1">
-              <span className="text-yellow-400">
-                {"★".repeat(product.rating)}
-              </span>
-              <p className="text-gray-500 text-sm ml-2">
-                ({product.reviews} reviews)
-              </p>
-            </div>
+            {/* Star Rating Component */}
+            <StarRating 
+              rating={productRatings[product.id]} 
+              setRating={(newRating) => updateRating(product.id, newRating)}
+              reviews={product.reviews}
+            />
 
             <div className="flex justify-between items-center mt-3">
               <p className="text-xl font-bold text-gray-900">

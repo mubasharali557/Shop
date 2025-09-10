@@ -117,6 +117,20 @@ const products = [
 const ToothBrushesPastes = () => {
   const [showCart, setShowCart] = useState(false);
   const { cart, addToCart, removeFromCart, increaseQty, decreaseQty, totalItems } = useCart();
+  const [productRatings, setProductRatings] = useState(
+    products.reduce((acc, product) => {
+      acc[product.id] = product.rating;
+      return acc;
+    }, {})
+  );
+
+  // Function to handle star click
+  const handleStarClick = (productId, newRating) => {
+    setProductRatings(prev => ({
+      ...prev,
+      [productId]: newRating
+    }));
+  };
 
   // Total Price
   const totalPrice = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
@@ -246,9 +260,24 @@ const ToothBrushesPastes = () => {
 
             {/* Ratings */}
             <div className="flex items-center mt-1">
-              <span className="text-yellow-400">
-                {"★".repeat(product.rating)}
-              </span>
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    className={`text-xl cursor-pointer ${
+                      star <= productRatings[product.id] 
+                        ? "text-yellow-400" 
+                        : "text-gray-300"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStarClick(product.id, star);
+                    }}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
               <p className="text-gray-500 text-sm ml-2">
                 ({product.reviews} reviews)
               </p>

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/app/context/CartContext";
 
 const products = [
-  {
+ {
     id: 1,
     title: "Nestle Fruita Vitals Chaunsa ",
     image: "/ju.jpg",
@@ -140,12 +140,26 @@ const products = [
     reviews: 500,
   },
 ];
+
 const Juices = () => {
   const [showCart, setShowCart] = useState(false);
+  const [productRatings, setProductRatings] = useState({});
   const { cart, addToCart, removeFromCart, increaseQty, decreaseQty, totalItems } = useCart();
 
   // Total Price
   const totalPrice = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+
+  // Handle star click
+  const handleStarClick = (productId, ratingValue) => {
+    setProductRatings(prev => {
+      // If clicking the same star again, reset to 0 (toggle off)
+      const newRating = prev[productId] === ratingValue ? 0 : ratingValue;
+      return {
+        ...prev,
+        [productId]: newRating
+      };
+    });
+  };
 
   return (
     <div className="p-6">
@@ -244,57 +258,76 @@ const Juices = () => {
         layout
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6"
       >
-        {products.map((product) => (
-          <motion.div
-            key={product.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.4 }}
-            className="max-w-xs bg-white rounded-2xl shadow-[0_0_4px_black] p-4 relative"
-          >
-            {/* Badge */}
-            <span className="absolute top-3 right-3 bg-gray-800 text-white text-xs px-3 py-1 rounded-full shadow-md shadow-black">
-              {product.category}
-            </span>
-
-            {/* Image */}
-            <motion.img
-              whileHover={{ scale: 1.1 }}
-              transition={{ duration: 0.3 }}
-              src={product.image}
-              alt={product.title}
-              className="w-full h-64 object-cover rounded-lg"
-            />
-
-            {/* Title */}
-            <h2 className="text-lg font-semibold mt-3">{product.title}</h2>
-
-            {/* Ratings */}
-            <div className="flex items-center mt-1">
-              <span className="text-yellow-400">
-                {"★".repeat(product.rating)}
+        {products.map((product) => {
+          // Get the current rating for this product (user-set or default)
+          const currentRating = productRatings[product.id] !== undefined 
+            ? productRatings[product.id] 
+            : product.rating;
+            
+          return (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.4 }}
+              className="max-w-xs bg-white rounded-2xl shadow-[0_0_4px_black] p-4 relative"
+            >
+              {/* Badge */}
+              <span className="absolute top-3 right-3 bg-gray-800 text-white text-xs px-3 py-1 rounded-full shadow-md shadow-black">
+                {product.category}
               </span>
-              <p className="text-gray-500 text-sm ml-2">
-                ({product.reviews} reviews)
-              </p>
-            </div>
 
-            {/* Price + Button */}
-            <div className="flex justify-between items-center mt-3">
-              <p className="text-xl font-bold text-gray-900">
-                Rs.{product.price}
-              </p>
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={() => addToCart(product)}
-                className="bg-orange-500 text-white px-4 py-2 rounded-full hover:bg-orange-600 transition"
-              >
-                Add to Cart
-              </motion.button>
-            </div>
-          </motion.div>
-        ))}
+              {/* Image */}
+              <motion.img
+                whileHover={{ scale: 1.1 }}
+                transition={{ duration: 0.3 }}
+                src={product.image}
+                alt={product.title}
+                className="w-full h-64 object-cover rounded-lg"
+              />
+
+              {/* Title */}
+              <h2 className="text-lg font-semibold mt-3">{product.title}</h2>
+
+              {/* Ratings */}
+              <div className="flex items-center mt-1">
+                <div className="flex">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => handleStarClick(product.id, star)}
+                      className="text-2xl focus:outline-none"
+                    >
+                      {star <= currentRating ? (
+                        <span className="text-yellow-400">★</span>
+                      ) : (
+                        <span className="text-gray-300">☆</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-gray-500 text-sm ml-2">
+                  ({product.reviews} reviews)
+                </p>
+              </div>
+
+              {/* Price + Button */}
+              <div className="flex justify-between items-center mt-3">
+                <p className="text-xl font-bold text-gray-900">
+                  Rs.{product.price}
+                </p>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => addToCart(product)}
+                  className="bg-orange-500 text-white px-4 py-2 rounded-full hover:bg-orange-600 transition"
+                >
+                  Add to Cart
+                </motion.button>
+              </div>
+            </motion.div>
+          );
+        })}
       </motion.div>
     </div>
   );

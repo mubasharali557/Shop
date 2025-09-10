@@ -117,8 +117,22 @@ const products = [
 const HandAndBodyWashes = () => {
   const [showCart, setShowCart] = useState(false);
   const { cart, addToCart, removeFromCart, increaseQty, decreaseQty, totalItems } = useCart();
+  const [productRatings, setProductRatings] = useState(
+    products.reduce((acc, product) => {
+      acc[product.id] = product.rating;
+      return acc;
+    }, {})
+  );
 
   const totalPrice = cart.reduce((total, item) => total + item.price * item.qty, 0);
+
+  // Function to handle star click
+  const handleStarClick = (productId, newRating) => {
+    setProductRatings(prev => ({
+      ...prev,
+      [productId]: newRating
+    }));
+  };
 
   const handleAddToCart = (product) => {
     const existingItem = cart.find((item) => item.id === product.id);
@@ -233,9 +247,24 @@ const HandAndBodyWashes = () => {
 
                 {/* Ratings */}
                 <div className="flex items-center mt-1">
-                  <span className="text-yellow-400">
-                    {"★".repeat(product.rating)}
-                  </span>
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span
+                        key={star}
+                        className={`text-xl cursor-pointer ${
+                          star <= productRatings[product.id] 
+                            ? "text-yellow-400" 
+                            : "text-gray-300"
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStarClick(product.id, star);
+                        }}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
                   <p className="text-gray-500 text-sm ml-2">
                     ({product.reviews} reviews)
                   </p>

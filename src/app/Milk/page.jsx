@@ -1,5 +1,3 @@
-
-
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -119,8 +117,22 @@ const products = [
 const Milk = () => {
   const [showCart, setShowCart] = useState(false);
   const { cart, addToCart, removeFromCart, increaseQty, decreaseQty, totalItems } = useCart();
+  const [productRatings, setProductRatings] = useState(
+    products.reduce((acc, product) => {
+      acc[product.id] = product.rating;
+      return acc;
+    }, {})
+  );
 
   const totalPrice = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+
+  // Function to handle star click
+  const handleStarClick = (productId, newRating) => {
+    setProductRatings(prev => ({
+      ...prev,
+      [productId]: newRating
+    }));
+  };
 
   // Animation Variants
   const containerVariants = {
@@ -233,8 +245,6 @@ const Milk = () => {
               <button
                 onClick={() => {
                   alert(`🎉 Order placed successfully! Total: Rs ${totalPrice.toFixed(2)}`);
-                  // If you want to clear cart after order, add: 
-                  // cart.forEach(item => removeFromCart(item.id));
                 }}
                 className="mt-4 w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700"
               >
@@ -278,9 +288,24 @@ const Milk = () => {
 
             {/* Ratings */}
             <div className="flex items-center mt-1">
-              <span className="text-yellow-400">
-                {"★".repeat(product.rating)}
-              </span>
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    className={`text-xl cursor-pointer ${
+                      star <= productRatings[product.id] 
+                        ? "text-yellow-400" 
+                        : "text-gray-300"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStarClick(product.id, star);
+                    }}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
               <p className="text-gray-500 text-sm ml-2">
                 ({product.reviews} reviews)
               </p>
