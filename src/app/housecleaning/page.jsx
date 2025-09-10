@@ -568,7 +568,7 @@ const HouseCleaning = () => {
               {/* Price + Button */}
               <div className="flex justify-between items-center mt-3">
                 <p className="text-xl font-bold text-gray-900">
-                  Rs.{product.price}
+                  Rs.{product.price} 
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
