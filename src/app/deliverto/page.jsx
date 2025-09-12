@@ -6,12 +6,31 @@
 //   const [city, setCity] = useState("");
 //   const [postalCode, setPostalCode] = useState("");
 
-//   const handleSubmit = (e) => {
+//   const handleSubmit = async (e) => {
 //     e.preventDefault();
-//     alert(`Delivery Address Saved:
-//     Address: ${address}
-//     City: ${city}
-//     Postal Code: ${postalCode}`);
+
+//     const deliveryData = { address, city, postalCode };
+
+//     try {
+//       const res = await fetch("http://localhost:5000/api/delivery/save", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(deliveryData),
+//       });
+
+//       const data = await res.json();
+
+//       if (res.ok) {
+//         alert("✅ Delivery address saved successfully!");
+//         setAddress("");
+//         setCity("");
+//         setPostalCode("");
+//       } else {
+//         alert("❌ Error: " + data.message);
+//       }
+//     } catch (error) {
+//       alert("⚠️ Server error: " + error.message);
+//     }
 //   };
 
 //   return (
@@ -81,7 +100,6 @@
 // }
 
 
-
 "use client";
 import React, { useState } from "react";
 
@@ -105,7 +123,7 @@ export default function DeliverPage() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("✅ Delivery address saved successfully!");
+        // Removed the alert message here
         setAddress("");
         setCity("");
         setPostalCode("");

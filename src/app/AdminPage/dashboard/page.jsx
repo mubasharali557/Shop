@@ -1,7 +1,5 @@
-
-
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FiUsers,
   FiShoppingCart,
@@ -14,56 +12,89 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function DashboardPage() {
   const stats = [
-    { name: "Total Users", value: "1,245", icon: <FiUsers />, color: "bg-blue-500" },
-    { name: "Orders", value: "320", icon: <FiShoppingCart />, color: "bg-green-500" },
-    { name: "Revenue", value: "$12,450", icon: <FiDollarSign />, color: "bg-yellow-500" },
-    { name: "Growth", value: "8.2%", icon: <FiTrendingUp />, color: "bg-purple-500" },
+    // { name: "Total Users", value: "1,245", icon: <FiUsers />, color: "bg-blue-500" },
+    // { name: "Orders", value: "320", icon: <FiShoppingCart />, color: "bg-green-500" },
+    // { name: "Revenue", value: "$12,450", icon: <FiDollarSign />, color: "bg-yellow-500" },
+    // { name: "Growth", value: "8.2%", icon: <FiTrendingUp />, color: "bg-purple-500" },
   ];
 
-  const [orders, setOrders] = useState([
-    { id: 1, customer: "Ali Khan", item: "Laptop", status: "Shipped" },
-  ]);
-
+  const [orders, setOrders] = useState([]);
   const [newOrder, setNewOrder] = useState({
     customer: "",
     item: "",
+    price: "",
+    image: "",
     status: "Pending",
   });
-
   const [activities, setActivities] = useState([]);
 
-  // 🔥 Add order
-  const addOrder = (e) => {
-    e.preventDefault();
-    if (!newOrder.customer || !newOrder.item) return;
+  // ✅ Fetch existing products from backend
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/products");
+        const data = await res.json();
+        setOrders(data);
+      } catch (error) {
+        console.error("❌ Error fetching products:", error);
+      }
+    };
+    fetchOrders();
+  }, []);
 
-    const newEntry = {
-      id: Date.now(),
-      ...newOrder,
+  // ✅ Add order -> POST to backend
+  const addOrder = async (e) => {
+    e.preventDefault();
+    if (!newOrder.customer || !newOrder.item || !newOrder.price) return;
+
+    const orderData = {
+      title: newOrder.item,
+      image: newOrder.image || "/default.jpg", // ✅ Image save
+      category: "Orders",
+      price: newOrder.price || 0,
+      rating: 0,
+      reviews: 0,
     };
 
-    setOrders([...orders, newEntry]);
+    try {
+      const res = await fetch("http://localhost:5000/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
 
-    setActivities([`${newOrder.customer} placed a new order for ${newOrder.item}.`, ...activities]);
+      const savedOrder = await res.json();
 
-    setNewOrder({ customer: "", item: "", status: "Pending" });
+      setOrders([...orders, savedOrder]);
+      setActivities([
+        `${newOrder.customer} placed a new order for ${newOrder.item} (💲${newOrder.price}).`,
+        ...activities,
+      ]);
+
+      setNewOrder({ customer: "", item: "", price: "", image: "", status: "Pending" });
+    } catch (error) {
+      console.error("❌ Error adding product:", error);
+    }
   };
 
-  // 🔥 Delete order
+  // ✅ Delete order (frontend only for now)
   const deleteOrder = (id) => {
-    const orderToDelete = orders.find((o) => o.id === id);
-    setOrders(orders.filter((order) => order.id !== id));
+    const orderToDelete = orders.find((o) => o._id === id || o.id === id);
+    setOrders(orders.filter((order) => order._id !== id && order.id !== id));
 
     if (orderToDelete) {
-      setActivities([`Order for ${orderToDelete.item} by ${orderToDelete.customer} was deleted.`, ...activities]);
+      setActivities([
+        `Order for ${orderToDelete.title} was deleted.`,
+        ...activities,
+      ]);
     }
   };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">📊 Dashboard Overview</h1>
+      <h1 className="text-3xl font-bold mb-6">Add New Products</h1>
 
-      {/* Stats Grid */}
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat, i) => (
           <motion.div
@@ -87,10 +118,10 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Orders */}
+        {/* Orders */}
         <div className="lg:col-span-2 bg-white rounded-xl shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center justify-between">
-            🛒 Recent Orders
+            Products Datalist
           </h2>
 
           {/* Add Order Form */}
@@ -113,6 +144,24 @@ export default function DashboardPage() {
               value={newOrder.item}
               onChange={(e) =>
                 setNewOrder({ ...newOrder, item: e.target.value })
+              }
+              className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="number"
+              placeholder="Price"
+              value={newOrder.price}
+              onChange={(e) =>
+                setNewOrder({ ...newOrder, price: e.target.value })
+              }
+              className="w-28 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="text"
+              placeholder="Image URL"
+              value={newOrder.image}
+              onChange={(e) =>
+                setNewOrder({ ...newOrder, image: e.target.value })
               }
               className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"
             />
@@ -143,49 +192,57 @@ export default function DashboardPage() {
                   <th className="p-3">#</th>
                   <th className="p-3">Customer</th>
                   <th className="p-3">Item</th>
+                  <th className="p-3">Price</th>
+                  <th className="p-3">Image</th> 
                   <th className="p-3">Status</th>
                   <th className="p-3">Action</th>
                 </tr>
               </thead>
-              <AnimatePresence component="tbody">
-                <tbody>
-                  {orders.map((order, i) => (
-                    <motion.tr
-                      key={order.id}
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ duration: 0.3 }}
-                      className="border-b hover:bg-gray-50"
-                    >
-                      <td className="p-3">{i + 1}</td>
-                      <td className="p-3">{order.customer}</td>
-                      <td className="p-3">{order.item}</td>
-                      <td className="p-3">
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm ${
-                            order.status === "Shipped"
-                              ? "bg-blue-100 text-blue-600"
-                              : order.status === "Pending"
-                              ? "bg-yellow-100 text-yellow-600"
-                              : "bg-green-100 text-green-600"
-                          }`}
-                        >
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        <button
-                          onClick={() => deleteOrder(order.id)}
-                          className="text-red-600 hover:text-red-800 flex items-center"
-                        >
-                          <FiTrash2 className="mr-1" /> Delete
-                        </button>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </AnimatePresence>
+              <tbody>
+                {orders.map((order, i) => (
+                  <motion.tr
+                    key={order._id || order.id}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.3 }}
+                    className="border-b hover:bg-gray-50"
+                  >
+                    <td className="p-3">{i + 1}</td>
+                    <td className="p-3">{newOrder.customer || "Guest"}</td>
+                    <td className="p-3">{order.title}</td>
+                    <td className="p-3">💲{order.price || 0}</td>
+                    <td className="p-3">
+                      <img
+                        src={order.image || "/default.jpg"}
+                        alt={order.title}
+                        className="w-12 h-12 object-cover rounded-lg border"
+                      />
+                    </td>
+                    <td className="p-3">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm ${
+                          newOrder.status === "Shipped"
+                            ? "bg-blue-100 text-blue-600"
+                            : newOrder.status === "Pending"
+                            ? "bg-yellow-100 text-yellow-600"
+                            : "bg-green-100 text-green-600"
+                        }`}
+                      >
+                        {newOrder.status}
+                      </span>
+                    </td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => deleteOrder(order._id || order.id)}
+                        className="text-red-600 hover:text-red-800 flex items-center"
+                      >
+                        <FiTrash2 className="mr-1" /> Delete
+                      </button>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
             </table>
           </div>
         </div>

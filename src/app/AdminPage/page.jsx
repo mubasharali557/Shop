@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiHome, FiUsers, FiSettings, FiLogOut } from "react-icons/fi";
+import { FiTruck } from "react-icons/fi";
+
 
 export default function AdminPageLayout({ children }) {
   const router = useRouter();
@@ -16,8 +18,9 @@ export default function AdminPageLayout({ children }) {
   const [error, setError] = useState("");
 
   const menuItems = [
-    { name: "Orders", icon: <FiHome />, href: "/AdminPage/dashboard" },
-    { name: "Add New Products", icon: <FiUsers />, href: "/AdminPage/users" },
+    { name: "Orders", icon: <FiHome />, href: "/AdminPage/order" },
+    { name: "Add New Products", icon: <FiUsers />, href: "/AdminPage/dashboard" },
+  { name: "Deliver", icon: <FiTruck />, href: "/AdminPage/deliver" }, 
     { name: "Settings", icon: <FiSettings />, href: "/AdminPage/settings" },
   ];
 
