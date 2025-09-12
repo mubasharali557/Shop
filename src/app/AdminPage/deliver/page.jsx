@@ -12,34 +12,25 @@ export default function DeliverPage() {
       const data = await res.json();
       if (res.ok) {
         setDeliveries(data);
-      } else {
-        alert("❌ Error: " + data.message);
       }
     } catch (error) {
-      alert("⚠️ Server error: " + error.message);
+      console.error("⚠️ Server error:", error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Delete delivery
+  // ✅ Delete delivery (without confirm/alert)
   const handleRemove = async (id) => {
-    if (!confirm("⚠️ Are you sure you want to remove this delivery?")) return;
-
     try {
       const res = await fetch(`http://localhost:5000/api/delivery/${id}`, {
         method: "DELETE",
       });
-      const data = await res.json();
-
       if (res.ok) {
-        alert("✅ Delivery removed successfully");
         setDeliveries(deliveries.filter((d) => d._id !== id));
-      } else {
-        alert("❌ Error: " + data.message);
       }
     } catch (error) {
-      alert("⚠️ Server error: " + error.message);
+      console.error("⚠️ Server error:", error.message);
     }
   };
 

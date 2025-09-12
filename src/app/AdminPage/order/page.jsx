@@ -1,200 +1,110 @@
- "use client";
-import React, { useState } from "react";
-import { FiEdit, FiTrash2, FiPlus, FiPackage, FiCheck, FiX } from "react-icons/fi";
-import { motion, AnimatePresence } from "framer-motion";
+"use client";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
-export default function ManageProducts() {
-  // ================= Products =================
-  const [products, setProducts] = useState([
-    // { id: 1, name: "Laptop", price: 1200, stock: 5 },
-    // { id: 2, name: "Smartphone", price: 800, stock: 10 },
-    // { id: 3, name: "Headphones", price: 150, stock: 20 },
-  ]);
+export default function OrdersPage() {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    price: "",
-    stock: "",
-  });
-
-  const [editId, setEditId] = useState(null);
-  const [editProduct, setEditProduct] = useState({ name: "", price: "", stock: "" });
-
-  // Add product
-  const addProduct = (e) => {
-    e.preventDefault();
-    if (!newProduct.name || !newProduct.price || !newProduct.stock) return;
-    setProducts([
-      ...products,
-      { id: Date.now(), ...newProduct, price: +newProduct.price, stock: +newProduct.stock },
-    ]);
-    setNewProduct({ name: "", price: "", stock: "" });
+  // ✅ Fetch all orders
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:5000/api/orders");
+      const data = await res.json();
+      setOrders(data);
+    } catch (err) {
+      console.error("❌ Error fetching orders:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Delete product
-  const deleteProduct = (id) => setProducts(products.filter((p) => p.id !== id));
+  // ✅ Delete order (no confirm/alert)
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/orders/${id}`, {
+        method: "DELETE",
+      });
 
-  // Start editing
-  const startEdit = (product) => {
-    setEditId(product.id);
-    setEditProduct(product);
+      if (res.ok) {
+        fetchOrders(); // refresh list
+      } else {
+        const errData = await res.json();
+        console.error("❌ Error:", errData.message);
+      }
+    } catch (err) {
+      console.error("❌ Error deleting order:", err);
+    }
   };
 
-  // Save edited product
-  const saveEdit = (id) => {
-    setProducts(
-      products.map((p) =>
-        p.id === id ? { ...p, ...editProduct, price: +editProduct.price, stock: +editProduct.stock } : p
-      )
-    );
-    setEditId(null);
-    setEditProduct({ name: "", price: "", stock: "" });
-  };
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      {/* Products Section */}
-      <h2 className="text-2xl font-bold mb-6">📦 Manage Products</h2>
-
-      {/* Add Product Form */}
-      <form
-        onSubmit={addProduct}
-        className="flex flex-wrap gap-3 mb-6 bg-white p-4 rounded-lg shadow-md"
+    <div className="min-h-screen bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-6 flex flex-col items-center">
+      {/* 📦 Orders List */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-4xl"
       >
-        <input
-          type="text"
-          placeholder="Product Name"
-          value={newProduct.name}
-          onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-          className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-400"
-        />
-        <input
-          type="number"
-          placeholder="Price"
-          value={newProduct.price}
-          onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-          className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-400"
-        />
-        <input
-          type="number"
-          placeholder="Stock"
-          value={newProduct.stock}
-          onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-          className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-400"
-        />
-        <button
-          type="submit"
-          className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-        >
-          <FiPackage className="mr-2" /> Add Product
-        </button>
-      </form>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">📦 All Orders</h2>
+        {loading ? (
+          <p>Loading orders...</p>
+        ) : orders.length === 0 ? (
+          <p>No orders found.</p>
+        ) : (
+          <div className="space-y-4">
+            {orders.map((order, index) => (
+              <div
+                key={order._id}
+                className="border p-4 rounded-lg shadow-sm bg-gray-50"
+              >
+                <h3 className="font-semibold">
+                  Order #{index + 1} - {order.formData?.firstName}{" "}
+                  {order.formData?.lastName}
+                </h3>
+                <p>
+                  <strong>Email:</strong> {order.formData?.email}
+                </p>
+                <p>
+                  <strong>Phone:</strong> {order.formData?.phone}
+                </p>
+                <p>
+                  <strong>Total Price:</strong> Rs {order.totalPrice}
+                </p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {order.createdAt
+                    ? new Date(order.createdAt).toLocaleString()
+                    : "N/A"}
+                </p>
 
-      {/* Products Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow-md">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-200 text-gray-700">
-              <th className="p-3">#</th>
-              <th className="p-3">Product</th>
-              <th className="p-3">Price</th>
-              <th className="p-3">Stock</th>
-              <th className="p-3 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <AnimatePresence>
-              {products.map((product, index) => (
-                <motion.tr
-                  key={product.id}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: 50 }}
-                  transition={{ duration: 0.3 }}
-                  className="border-b hover:bg-gray-50 transition"
+                <ul className="list-disc ml-6 mt-2">
+                  {order.cart.map((item) => (
+                    <li key={item.id}>
+                      {item.title} (x{item.qty}) – Rs {item.price}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Delete Button */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleDelete(order._id)}
+                  className="mt-4 bg-red-600 text-white py-2 px-4 rounded-lg font-semibold shadow-md hover:bg-red-700 transition"
                 >
-                  <td className="p-3">{index + 1}</td>
-                  <td className="p-3">
-                    {editId === product.id ? (
-                      <input
-                        type="text"
-                        value={editProduct.name}
-                        onChange={(e) =>
-                          setEditProduct({ ...editProduct, name: e.target.value })
-                        }
-                        className="px-2 py-1 border rounded"
-                      />
-                    ) : (
-                      product.name
-                    )}
-                  </td>
-                  <td className="p-3">
-                    {editId === product.id ? (
-                      <input
-                        type="number"
-                        value={editProduct.price}
-                        onChange={(e) =>
-                          setEditProduct({ ...editProduct, price: e.target.value })
-                        }
-                        className="px-2 py-1 border rounded w-20"
-                      />
-                    ) : (
-                      `$${product.price}`
-                    )}
-                  </td>
-                  <td className="p-3">
-                    {editId === product.id ? (
-                      <input
-                        type="number"
-                        value={editProduct.stock}
-                        onChange={(e) =>
-                          setEditProduct({ ...editProduct, stock: e.target.value })
-                        }
-                        className="px-2 py-1 border rounded w-20"
-                      />
-                    ) : (
-                      product.stock
-                    )}
-                  </td>
-                  <td className="p-3 flex justify-center gap-3">
-                    {editId === product.id ? (
-                      <>
-                        <button
-                          onClick={() => saveEdit(product.id)}
-                          className="text-green-600 hover:text-green-800"
-                        >
-                          <FiCheck />
-                        </button>
-                        <button
-                          onClick={() => setEditId(null)}
-                          className="text-gray-600 hover:text-gray-800"
-                        >
-                          <FiX />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => startEdit(product)}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          <FiEdit />
-                        </button>
-                        <button
-                          onClick={() => deleteProduct(product.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          </tbody>
-        </table>
-      </div>
+                  🗑️ Remove Order
+                </motion.button>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 }
